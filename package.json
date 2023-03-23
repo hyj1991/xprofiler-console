@@ -6,6 +6,7 @@
     "declarations": true
   },
   "dependencies": {
+    "@xprofiler/injection": "^0.0.5",
     "basic-auth": "^2.0.1",
     "egg": "^2.26.1",
     "egg-mysql": "^3.0.0",
@@ -19,12 +20,15 @@
     "uuid": "^8.0.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.0",
     "autod": "^3.1.0",
     "autod-egg": "^1.1.0",
     "egg-bin": "^4.14.1",
     "egg-mock": "^4.0.0",
     "eslint": "^7.0.0",
-    "eslint-config-egg": "^8.0.1"
+    "eslint-config-egg": "^8.0.1",
+    "reflect-metadata": "^0.1.13",
+    "typescript": "^5.0.2"
   },
   "engines": {
     "node": ">=10.0.0"
@@ -40,7 +44,9 @@
     "cov": "npm run init-test-db && egg-bin cov",
     "lint": "eslint app config lib test --fix",
     "ci": "npm run lint && npm run cov",
-    "autod": "autod"
+    "autod": "autod",
+    "tsc": "rm -rf dist && tsc -p ./tsconfig.json",
+    "build": "rm -rf dist && tsc -p ./tsconfig.build.json"
   },
   "files": [
     "app",
