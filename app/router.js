@@ -1,9 +1,15 @@
 'use strict';
 
+const { Container } = require('@xprofiler/injection');
+const { HttpServer,
+  EGG_ROUTER,
+  EGG_MIDDLEWARES,
+} = require('../dist/index');
+
 /**
  * @param {Egg.Application} app - egg application
  */
-module.exports = app => {
+module.exports = async app => {
   const { router } = app;
   const {
     userRequired,
@@ -18,8 +24,20 @@ module.exports = app => {
     checkParams,
   } = app.middleware.params({}, app);
 
-  // home
-  router.get('/', userRequired, 'home.index');
+  const container = new Container();
+  container.set({ id: Container, value: container });
+  container.set(HttpServer);
+  container.set({ id: EGG_ROUTER, value: router });
+  container.set({
+    id: EGG_MIDDLEWARES,
+    value: {
+      auth: app.middlewares.auth({}, app),
+      params: app.middleware.params({}, app),
+    },
+  });
+
+  const server = container.get(HttpServer);
+  await server.register();
 
   // user
   router.get('/xapi/user', userRequired, 'user.index');
