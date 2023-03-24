@@ -30,10 +30,10 @@ export class HttpServer {
 
       methodMetadata.forEach(metadata => {
         const url = path.join(controllerMetadata.prefix, metadata.path);
-        const method = metadata.method ?? controllerMetadata.method;
-        const args = metadata.args ?? controllerMetadata.args;
-        const middleware = controllerMetadata.middleware
-          .concat(metadata.middleware)
+        const method = metadata.method || controllerMetadata.method;
+        const args = this.assign(controllerMetadata.args, metadata.args);
+        const middleware = Array.from(new Set(controllerMetadata.middleware
+          .concat(metadata.middleware)))
           .map(mid => this.parseMiddleware(mid, args[mid]));
         this.router[method](url, ...middleware, async function (ctx: any) {
           await container.run(async () => {
@@ -60,6 +60,20 @@ export class HttpServer {
       return (middlewares as (...args: any[]) => Function).call(null, ...args);
     }
     return middlewares;
+  }
+
+  private assign(...args: { [key: string]: any[] }[]): { [key: string]: any[] } {
+    const result: { [key: string]: any[] } = {};
+    args.forEach(arg => {
+      Object.keys(arg).forEach(key => {
+        if (!result[key]) {
+          result[key] = [];
+        }
+        result[key] = result[key].concat(arg[key]);
+      });
+    });
+
+    return result;
   }
 }
 

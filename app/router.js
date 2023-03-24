@@ -39,34 +39,6 @@ module.exports = async app => {
   const server = container.get(HttpServer);
   await server.register();
 
-  // overview
-  router.get('/xapi/overview_metrics', userRequired, appMemberRequired, 'overview.getOverviewMetrics');
-  router.get('/xapi/main_metrics', userRequired, appMemberRequired, 'overview.getMainMetrics');
-
-  // instance
-  router.get('/xapi/agents', userRequired, appMemberRequired, 'instance.getAgents');
-  router.get('/xapi/agent', userRequired, agentAccessibleRequired, checkParams(['agentId']), 'instance.checkAgent');
-
-  // instance/process
-  router.get('/xapi/node_processes', userRequired, agentAccessibleRequired, checkParams(['agentId']), 'process.getNodeProcesses');
-  router.get('/xapi/xprofiler_processes', userRequired, agentAccessibleRequired, checkParams(['agentId']), 'process.getXprofilerProcesses');
-  router.get('/xapi/xprofiler_status', userRequired, agentAccessibleRequired, checkParams(['agentId', 'pid']), 'process.checkXprofilerStatus');
-  router.get('/xapi/process_trend', userRequired, agentAccessibleRequired, checkParams(['agentId', 'pid', 'trendType', 'duration']), 'process.getProcessTrend');
-  router.post('/xapi/process_trend', userRequired, agentAccessibleRequired, checkParams(['agentId', 'pid']), 'process.saveProcessTrend');
-  router.post('/xapi/action', userRequired, agentAccessibleRequired, checkParams(['agentId', 'pid', 'action']), 'process.takeAction');
-
-  // instance/system
-  router.get('/xapi/system_overview', userRequired, agentAccessibleRequired, checkParams(['agentId']), 'system.getOverview');
-  router.get('/xapi/system_trend', userRequired, agentAccessibleRequired, checkParams(['agentId', 'trendType', 'duration']), 'system.getSystemTrend');
-
-  // instance/error
-  router.get('/xapi/error_files', userRequired, agentAccessibleRequired, checkParams(['agentId']), 'error.getFiles');
-  router.get('/xapi/error_logs', userRequired, agentAccessibleRequired, checkParams(['agentId', 'errorFile', 'currentPage', 'pageSize']), 'error.getLogs');
-
-  // instance/module
-  router.get('/xapi/module_files', userRequired, agentAccessibleRequired, checkParams(['agentId']), 'module.getFiles');
-  router.get('/xapi/module', userRequired, agentAccessibleRequired, checkParams(['agentId', 'moduleFile']), 'module.getModules');
-
   // file
   router.get('/xapi/files', userRequired, appMemberRequired, checkParams(['filterType', 'currentPage', 'pageSize']), 'file.getFiles');
   router.get('/file/download', userRequired, fileAccessibleRequired, checkParams(['fileId', 'fileType']), 'file.downloadFile');

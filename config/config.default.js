@@ -18,7 +18,7 @@ module.exports = appInfo => {
   config.keys = appInfo.name + '_1588763657594_4897';
 
   config.development = {
-    watchDirs: ['lib'],
+    watchDirs: ['lib', 'dist'],
   };
 
   config.static = {

@@ -1,13 +1,25 @@
-'use strict';
+// @ts-nocheck
+import zlib from 'zlib';
+import { promisify } from 'util';
+import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
+import { Controller } from '../../shared/base';
+import { HttpController, HttpMethod } from '../../../decorator/http';
+import { HttpMethods } from '../../../constant';
 
-const zlib = require('zlib');
-const promisify = require('util').promisify;
 const gzip = promisify(zlib.gzip);
-const moment = require('moment');
-const { v4: uuidv4 } = require('uuid');
-const Controller = require('egg').Controller;
 
-class ProcessController extends Controller {
+@HttpController({
+  prefix: '/xapi',
+  middleware: ['auth.userRequired', 'auth.agentAccessibleRequired', 'params.check'],
+  args: {
+    'params.check': [['agentId']]
+  }
+})
+export class ProcessController extends Controller {
+  @HttpMethod({
+    path: '/node_processes',
+  })
   async getNodeProcesses() {
     const { ctx } = this;
     const { appId, agentId } = ctx.query;
@@ -29,6 +41,9 @@ class ProcessController extends Controller {
     ctx.body = { ok: true, data: { list } };
   }
 
+  @HttpMethod({
+    path: '/xprofiler_processes',
+  })
   async getXprofilerProcesses() {
     const { ctx, ctx: { service: { overview } } } = this;
     const { appId, agentId } = ctx.query;
@@ -102,6 +117,12 @@ class ProcessController extends Controller {
     ctx.body = { ok: true, data };
   }
 
+  @HttpMethod({
+    path: '/xprofiler_status',
+    args: {
+      'params.check': [['pid']]
+    }
+  })
   async checkXprofilerStatus() {
     const { ctx } = this;
     const { appId, agentId, pid } = ctx.query;
@@ -116,6 +137,12 @@ class ProcessController extends Controller {
     ctx.body = { ok: true, data };
   }
 
+  @HttpMethod({
+    path: '/process_trend',
+    args: {
+      'params.check': [['pid', 'trendType', 'duration']]
+    }
+  })
   async getProcessTrend() {
     const { ctx, ctx: { service: { process } } } = this;
     const { appId, agentId, pid, trendType, duration } = ctx.query;
@@ -127,6 +154,13 @@ class ProcessController extends Controller {
     ctx.body = { ok: true, data };
   }
 
+  @HttpMethod({
+    path: '/process_trend',
+    method:HttpMethods.POST,
+    args: {
+      'params.check': [['pid']]
+    }
+  })
   async saveProcessTrend() {
     const { ctx, ctx: { app: { storage, modifyFileName }, service: { process, mysql } } } = this;
     const { appId, agentId, pid } = ctx.request.body;
@@ -156,6 +190,13 @@ class ProcessController extends Controller {
     ctx.body = { ok: true, data: { file: fileName } };
   }
 
+  @HttpMethod({
+    path: '/action',
+    method:HttpMethods.POST,
+    args: {
+      'params.check': [['pid', 'action']]
+    }
+  })
   async takeAction() {
     const { ctx, ctx: { app: { config: { profilingTime } }, service: { mysql } } } = this;
     const { appId, agentId, pid, action, status } = ctx.request.body;
@@ -221,5 +262,3 @@ class ProcessController extends Controller {
     ctx.body = { ok: true, data: { file } };
   }
 }
-
-module.exports = ProcessController;

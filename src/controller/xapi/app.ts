@@ -1,5 +1,4 @@
-'use strict';
-
+// @ts-nocheck
 import { Controller } from "../shared/base";
 import { HttpController, HttpMethod } from "../../decorator/http";
 import { HttpMethods } from "../../constant";
@@ -22,7 +21,7 @@ export class AppController extends Controller {
     const { type } = ctx.query;
 
     // get my/joined apps
-    let list: any[] = [];
+    let list: [] = [];
     if (type === 'myApps') {
       list = await mysql.getMyApps(userId);
     }
@@ -58,7 +57,7 @@ export class AppController extends Controller {
     const { userId } = ctx.user;
     const { newAppName } = ctx.request.body;
 
-    const appSecret = (app as any).createAppSecret(userId, newAppName);
+    const appSecret = app.createAppSecret(userId, newAppName);
 
     const res = await ctx.tryCatch('mysql', 'saveApp', [userId, newAppName, appSecret], '不能创建重复应用');
     if (!res) {

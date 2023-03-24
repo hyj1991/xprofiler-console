@@ -1,8 +1,18 @@
-'use strict';
+// @ts-nocheck
+import { Controller } from '../../shared/base';
+import { HttpController, HttpMethod } from '../../../decorator/http';
 
-const Controller = require('egg').Controller;
-
-class SystemController extends Controller {
+@HttpController({
+  prefix: '/xapi',
+  middleware: ['auth.userRequired', 'auth.agentAccessibleRequired', 'params.check'],
+  args: {
+    'params.check': [['agentId']]
+  }
+})
+export class SystemController extends Controller {
+  @HttpMethod({
+    path: '/system_overview'
+  })
   async getOverview() {
     const { ctx, ctx: { service: { overview } } } = this;
     const { appId, agentId } = ctx.query;
@@ -49,6 +59,12 @@ class SystemController extends Controller {
     ctx.body = { ok: true, data };
   }
 
+  @HttpMethod({
+    path: '/system_trend',
+    args: {
+      'params.check': [['trendType', 'duration']]
+    }
+  })
   async getSystemTrend() {
     const { ctx, ctx: { service: { system } } } = this;
     const { appId, agentId, trendType, duration } = ctx.query;
@@ -60,5 +76,3 @@ class SystemController extends Controller {
     ctx.body = { ok: true, data };
   }
 }
-
-module.exports = SystemController;

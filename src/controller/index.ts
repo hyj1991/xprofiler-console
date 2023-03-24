@@ -4,10 +4,9 @@ import { ConstructableT } from "@xprofiler/injection";
 import { HTTP_CONTROLLER_METADATA_KEY } from '../constant';
 import { is } from '../common/is';
 
-
 export async function scan(dirname: string = __dirname): Promise<ConstructableT[]> {
   const list = new Array<ConstructableT>();
-  const ignore = [/shared/, /index/, /.ts/, /.map/];
+  const ignore = [/.ts/, /.map/];
 
   const files = await fs.readdir(dirname);
   for (const file of files) {

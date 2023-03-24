@@ -1,9 +1,16 @@
-'use strict';
+// @ts-nocheck
+import pMap from 'p-map';
+import { Controller } from '../shared/base';
+import { HttpController, HttpMethod } from '../../decorator/http';
 
-const pMap = require('p-map');
-const Controller = require('egg').Controller;
-
-class OverviewController extends Controller {
+@HttpController({
+  prefix: '/xapi',
+  middleware: ['auth.userRequired', 'auth.appMemberRequired'],
+})
+export class OverviewController extends Controller {
+  @HttpMethod({
+    path: '/overview_metrics'
+  })
   async getOverviewMetrics() {
     const { ctx, ctx: { service: { manager, mysql, alarm } } } = this;
     const { appId } = ctx.query;
@@ -67,6 +74,9 @@ class OverviewController extends Controller {
     ctx.body = { ok: true, data };
   }
 
+  @HttpMethod({
+    path: '/main_metrics'
+  })
   async getMainMetrics() {
     const { ctx, ctx: { app,
       app: { config: { showHeapLimit } },
@@ -156,5 +166,3 @@ class OverviewController extends Controller {
     ctx.body = { ok: true, data: { list } };
   }
 }
-
-module.exports = OverviewController;

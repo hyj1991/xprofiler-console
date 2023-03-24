@@ -1,9 +1,19 @@
-'use strict';
+// @ts-nocheck
+import path from 'path';
+import { Controller } from '../../shared/base';
+import { HttpController, HttpMethod } from '../../../decorator/http';
 
-const path = require('path');
-const Controller = require('egg').Controller;
-
-class ErrorController extends Controller {
+@HttpController({
+  prefix: '/xapi',
+  middleware: ['auth.userRequired', 'auth.agentAccessibleRequired', 'params.check'],
+  args: {
+    'params.check': [['agentId']],
+  },
+})
+export class ErrorController extends Controller {
+  @HttpMethod({
+    path: '/error_files'
+  })
   async getFiles() {
     const { ctx, ctx: { service: { manager } } } = this;
     const { appId, agentId } = ctx.query;
@@ -22,6 +32,12 @@ class ErrorController extends Controller {
     ctx.body = { ok: true, data: { list } };
   }
 
+  @HttpMethod({
+    path: '/error_logs',
+    args: {
+      'params.check': [['errorFile', 'currentPage', 'pageSize']],
+    },
+  })
   async getLogs() {
     const { ctx, ctx: { service: { manager } } } = this;
     const { appId, agentId, errorFile, currentPage, pageSize } = ctx.query;
@@ -38,4 +54,3 @@ class ErrorController extends Controller {
   }
 }
 
-module.exports = ErrorController;

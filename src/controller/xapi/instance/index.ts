@@ -1,8 +1,16 @@
-'use strict';
+// @ts-nocheck
+import { Controller } from '../../shared/base';
+import { HttpController, HttpMethod } from '../../../decorator/http';
 
-const Controller = require('egg').Controller;
-
-class InstanceController extends Controller {
+@HttpController({
+  prefix: '/xapi',
+  middleware: ['auth.userRequired'],
+})
+export class InstanceController extends Controller {
+  @HttpMethod({
+    path: '/agents',
+    middleware: ['auth.appMemberRequired'],
+  })
   async getAgents() {
     const { ctx, ctx: { service: { manager } } } = this;
     const { appId } = ctx.query;
@@ -16,6 +24,13 @@ class InstanceController extends Controller {
     ctx.body = { ok: true, data: { list } };
   }
 
+  @HttpMethod({
+    path: '/agent',
+    middleware: ['auth.agentAccessibleRequired', 'params.check'],
+    args: {
+      'params.check': [['agentId']]
+    }
+  })
   async checkAgent() {
     const { ctx, ctx: { app: { isNumber } } } = this;
     const { appId, agentId } = ctx.query;
@@ -47,4 +62,3 @@ class InstanceController extends Controller {
   }
 }
 
-module.exports = InstanceController;
