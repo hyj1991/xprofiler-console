@@ -1,9 +1,17 @@
-'use strict';
+// @ts-nocheck
+import pMap from 'p-map';
+import { Controller } from "./shared/base";
+import { HttpController, HttpMethod } from "../common/decorator/http";
+import { HttpMethods } from '../constant';
 
-const pMap = require('p-map');
-const Controller = require('egg').Controller;
-
-class SettingsController extends Controller {
+@HttpController({
+  prefix: '/xapi',
+  middleware: ['auth.userRequired', 'auth.appOwnerRequired']
+})
+export class SettingsController extends Controller {
+  @HttpMethod({
+    path: '/settings'
+  })
   async getSettingInfo() {
     const { ctx } = this;
     const { info: { id: appId, name, secret } } = ctx.appInfo;
@@ -11,6 +19,14 @@ class SettingsController extends Controller {
     ctx.body = { ok: true, data: { appId, name, secret } };
   }
 
+  @HttpMethod({
+    path: '/settings_app_name',
+    method: HttpMethods.PUT,
+    middleware: ['params.check'],
+    args: {
+      'params.check': [['newAppName']]
+    }
+  })
   async renameApp() {
     const { ctx, ctx: { service: { mysql } } } = this;
     const { appId, newAppName } = ctx.request.body;
@@ -20,6 +36,10 @@ class SettingsController extends Controller {
     ctx.body = { ok: true };
   }
 
+  @HttpMethod({
+    path: '/settings_app',
+    method: HttpMethods.DELETE,
+  })
   async deleteApp() {
     const { ctx, ctx: { app: { storage }, service: { mysql } } } = this;
     const { appId } = ctx.request.body;
@@ -53,4 +73,3 @@ class SettingsController extends Controller {
   }
 }
 
-module.exports = SettingsController;
