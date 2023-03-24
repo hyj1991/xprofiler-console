@@ -1,6 +1,6 @@
 import path from 'path';
 import { ConstructableT, Container, Injectable, Inject } from "@xprofiler/injection";
-import { scan } from "./controller";
+import { Controller } from "./controller";
 import { IHttpControllerMetadata, IHttpMethodMetadata, IMiddlewareMap, IRouter, } from "./type";
 import {
   EGG_CONTEXT, EGG_ROUTER, EGG_MIDDLEWARES,
@@ -19,7 +19,7 @@ export class HttpServer {
   async register() {
     const container = this.container;
 
-    (await scan()).forEach((controller: ConstructableT) => {
+    (await Controller.scan()).forEach((controller: ConstructableT) => {
       container.set(controller);
 
       const controllerMetadata: IHttpControllerMetadata =
@@ -46,7 +46,7 @@ export class HttpServer {
     });
 
     await container.findModuleExports();
-    console.log(12333, container);
+    console.log('--------->', container.children[0]);
   }
 
   private parseMiddleware(tags: string, args: any[] = [], middlewares?: IMiddlewareMap | Function) {
