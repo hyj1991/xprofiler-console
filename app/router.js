@@ -39,11 +39,6 @@ module.exports = async app => {
   const server = container.get(HttpServer);
   await server.register();
 
-  // app
-  router.get('/xapi/apps', userRequired, checkParams(['type']), 'app.getApps');
-  router.get('/xapi/app', userRequired, appMemberRequired, 'app.getAppInfo');
-  router.post('/xapi/app', userRequired, checkParams(['newAppName']), 'app.saveApp');
-
   // overview
   router.get('/xapi/overview_metrics', userRequired, appMemberRequired, 'overview.getOverviewMetrics');
   router.get('/xapi/main_metrics', userRequired, appMemberRequired, 'overview.getMainMetrics');

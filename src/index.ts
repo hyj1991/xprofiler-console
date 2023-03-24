@@ -31,9 +31,10 @@ export class HttpServer {
       methodMetadata.forEach(metadata => {
         const url = path.join(controllerMetadata.prefix, metadata.path);
         const method = metadata.method ?? controllerMetadata.method;
-        const middleware = metadata.middleware
-          .concat(controllerMetadata.middleware)
-          .map(mid => this.parseMiddleware(mid));
+        const args = metadata.args ?? controllerMetadata.args;
+        const middleware = controllerMetadata.middleware
+          .concat(metadata.middleware)
+          .map(mid => this.parseMiddleware(mid, args[mid]));
         this.router[method](url, ...middleware, async function (ctx: any) {
           await container.run(async () => {
             container.set({ id: EGG_CONTEXT, value: ctx });
@@ -48,11 +49,15 @@ export class HttpServer {
     console.log(12333, container);
   }
 
-  private parseMiddleware(tags: string, middlewares?: IMiddlewareMap | Function) {
+  private parseMiddleware(tags: string, args: any[] = [], middlewares?: IMiddlewareMap | Function) {
     middlewares ??= this.middlewares;
     if (middlewares && tags) {
       const [tag, ...remain] = tags.split('.');
-      return this.parseMiddleware(remain.join('.'), middlewares[tag]);
+      return this.parseMiddleware(remain.join('.'), args, middlewares[tag]);
+    }
+
+    if (args.length) {
+      return (middlewares as (...args: any[]) => Function).call(null, ...args);
     }
     return middlewares;
   }

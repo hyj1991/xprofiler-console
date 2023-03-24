@@ -12,6 +12,7 @@ export function HttpController(options?: HttpControllerOptions) {
       prefix: "",
       method: HttpMethods.GET,
       middleware: [],
+      args: {},
       ...options
     }
     Reflect.defineMetadata(HTTP_CONTROLLER_METADATA_KEY, metadata, target);
@@ -28,6 +29,7 @@ export function HttpMethod(options?: HttpMethodOptions) {
       path: "",
       method: HttpMethods.GET,
       middleware: [],
+      args: {},
       ...options
     };
 
