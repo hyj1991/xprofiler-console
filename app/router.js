@@ -39,14 +39,6 @@ module.exports = async app => {
   const server = container.get(HttpServer);
   await server.register();
 
-  // team
-  router.get('/xapi/team_members', userRequired, appMemberRequired, 'team.getMembers');
-  router.post('/xapi/team_member', userRequired, appMemberRequired, checkParams(['userId']), 'team.inviteMember');
-  router.post('/xapi/team_ownership', userRequired, appOwnerRequired, checkParams(['userId']), 'team.transferOwnership');
-  router.put('/xapi/invitation', userRequired, appInvitationRequired, checkParams(['status']), 'team.updateInvitation');
-  router.delete('/xapi/leave_team', userRequired, appMemberRequired, 'team.leaveTeam');
-  router.delete('/xapi/team_member', userRequired, appOwnerRequired, checkParams(['userId']), 'team.removeMember');
-
   // alarm
   router.get('/xapi/alarm_strategies', userRequired, appMemberRequired, 'alarm.getStrategies');
   router.post('/xapi/alarm_strategy', userRequired, appMemberRequired, 'alarm.addStrategy');

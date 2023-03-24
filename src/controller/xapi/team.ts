@@ -1,9 +1,18 @@
-'use strict';
+// @ts-nocheck
+import pMap from 'p-map';
+import { Controller } from "../shared/base";
+import { HttpController, HttpMethod } from "../../common/decorator/http";
+import { HttpMethods } from '../../constant';
 
-const pMap = require('p-map');
-const Controller = require('egg').Controller;
-
-class TeamController extends Controller {
+@HttpController({
+  prefix: '/xapi',
+  middleware: ['auth.userRequired'],
+})
+export class TeamController extends Controller {
+  @HttpMethod({
+    path: '/team_members',
+    middleware: ['auth.appMemberRequired'],
+  })
   async getMembers() {
     const { ctx, ctx: { service: { mysql } } } = this;
     const { appId } = ctx.query;
@@ -44,6 +53,14 @@ class TeamController extends Controller {
     ctx.body = { ok: true, data: { list, currentUserId } };
   }
 
+  @HttpMethod({
+    path: '/team_member',
+    method: HttpMethods.POST,
+    middleware: ['auth.appMemberRequired', 'params.check'],
+    args: {
+      'params.check': [['userId']],
+    },
+  })
   async inviteMember() {
     const { ctx, ctx: { service: { mysql } } } = this;
     const { appId, userId: invitedUser } = ctx.request.body;
@@ -73,39 +90,14 @@ class TeamController extends Controller {
     ctx.body = { ok: true };
   }
 
-  async updateInvitation() {
-    const { ctx, ctx: { service: { mysql } } } = this;
-    const { appId: invitedApp, status } = ctx.request.body;
-    const { userId } = ctx.user;
-
-    if (status) {
-      await mysql.confirmInvitation(invitedApp, userId);
-    } else {
-      await mysql.deleteMember(invitedApp, userId);
-    }
-
-    ctx.body = { ok: true };
-  }
-
-  async leaveTeam() {
-    const { ctx, ctx: { service: { mysql } } } = this;
-    const { appId } = ctx.request.body;
-    const { userId } = ctx.user;
-
-    await mysql.deleteMember(appId, userId);
-
-    ctx.body = { ok: true };
-  }
-
-  async removeMember() {
-    const { ctx, ctx: { service: { mysql } } } = this;
-    const { appId, userId: invitedUser } = ctx.request.body;
-
-    await mysql.deleteMember(appId, invitedUser);
-
-    ctx.body = { ok: true };
-  }
-
+  @HttpMethod({
+    path: '/team_ownership',
+    method: HttpMethods.POST,
+    middleware: ['auth.appOwnerRequired', 'params.check'],
+    args: {
+      'params.check': [['userId']],
+    },
+  })
   async transferOwnership() {
     const { ctx, ctx: { service: { mysql } } } = this;
     const { appId, userId: transferringUser } = ctx.request.body;
@@ -121,6 +113,58 @@ class TeamController extends Controller {
 
     ctx.body = { ok: true };
   }
-}
 
-module.exports = TeamController;
+  @HttpMethod({
+    path: '/invitation',
+    method: HttpMethods.PUT,
+    middleware: ['auth.appInvitationRequired', 'params.check'],
+    args: {
+      'params.check': [['status']],
+    },
+  })
+  async updateInvitation() {
+    const { ctx, ctx: { service: { mysql } } } = this;
+    const { appId: invitedApp, status } = ctx.request.body;
+    const { userId } = ctx.user;
+
+    if (status) {
+      await mysql.confirmInvitation(invitedApp, userId);
+    } else {
+      await mysql.deleteMember(invitedApp, userId);
+    }
+
+    ctx.body = { ok: true };
+  }
+
+  @HttpMethod({
+    path: '/leave_team',
+    method: HttpMethods.DELETE,
+    middleware: ['auth.appMemberRequired'],
+  })
+  async leaveTeam() {
+    const { ctx, ctx: { service: { mysql } } } = this;
+    const { appId } = ctx.request.body;
+    const { userId } = ctx.user;
+
+    await mysql.deleteMember(appId, userId);
+
+    ctx.body = { ok: true };
+  }
+
+  @HttpMethod({
+    path: '/team_member',
+    method: HttpMethods.DELETE,
+    middleware: ['auth.appOwnerRequired', 'params.check'],
+    args: {
+      'params.check': [['userId']],
+    },
+  })
+  async removeMember() {
+    const { ctx, ctx: { service: { mysql } } } = this;
+    const { appId, userId: invitedUser } = ctx.request.body;
+
+    await mysql.deleteMember(appId, invitedUser);
+
+    ctx.body = { ok: true };
+  }
+}
