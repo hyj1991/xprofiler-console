@@ -18,7 +18,7 @@ export function HttpController(options?: HttpControllerOptions) {
     Reflect.defineMetadata(HTTP_CONTROLLER_METADATA_KEY, metadata, target);
 
     // make the controller injectable
-    Injectable({ scope: ScopeType.SINGLETON })(target);
+    Injectable({ scope: ScopeType.EXECUTION })(target);
   };
 }
 

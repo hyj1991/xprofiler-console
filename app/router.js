@@ -39,21 +39,6 @@ module.exports = async app => {
   const server = container.get(HttpServer);
   await server.register();
 
-  // file
-  router.get('/xapi/files', userRequired, appMemberRequired, checkParams(['filterType', 'currentPage', 'pageSize']), 'file.getFiles');
-  router.get('/file/download', userRequired, fileAccessibleRequired, checkParams(['fileId', 'fileType']), 'file.downloadFile');
-  router.post('/xapi/file_status', userRequired, fileAccessibleRequired, checkParams(['files']), 'file.checkFileStatus');
-  router.post('/xapi/file_transfer', userRequired, fileAccessibleRequired, checkParams(['fileId', 'fileType']), 'file.transferFile');
-  router.post('/xapi/file_favor', userRequired, fileAccessibleRequired, checkParams(['fileId', 'fileType', 'favor']), 'file.favorFile');
-  router.delete('/xapi/file_deletion', userRequired, fileAccessibleRequired, checkParams(['fileId', 'fileType']), 'file.deleteFile');
-
-  // devtools
-  router.get('/dashboard/devtools-new', userRequired, fileAccessibleRequired, checkParams(['fileId', 'fileType', 'selectedTab']), 'devtools.newDevtools');
-  router.get('/dashboard/devtools-old', userRequired, fileAccessibleRequired, checkParams(['fileId', 'fileType', 'selectedTab']), 'devtools.oldDevtools');
-
-  // thirdparty analytics
-  router.get('/dashboard/speedscope', userRequired, fileAccessibleRequired, checkParams(['fileId', 'fileType', 'downloadPath']), 'thirdparty.speedscope');
-
   // upload file
   router.post('/xapi/upload_file', userRequired, appMemberRequired, checkParams(['fileType']), 'upload.fromConsole');
   router.post('/xapi/upload_from_xtransit', checkParams(['fileId', 'fileType', 'nonce', 'timestamp', 'signature']), 'upload.fromXtransit');

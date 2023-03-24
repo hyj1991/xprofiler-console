@@ -39,7 +39,7 @@ export class HttpServer {
           await container.run(async () => {
             container.set({ id: EGG_CONTEXT, value: ctx });
             const instance = container.get(controller) as typeof controller;
-            await instance[metadata.prop].call({ ctx });
+            await instance[metadata.prop].call(instance);
           });
         });
       });

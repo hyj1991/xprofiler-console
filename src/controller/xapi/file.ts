@@ -1,10 +1,21 @@
-'use strict';
+// @ts-nocheck
+import pMap from 'p-map';
+import { Controller } from '../shared/base';
+import { HttpController, HttpMethod } from '../../decorator/http';
+import { HttpMethods } from '../../constant';
 
-const { PassThrough } = require('stream');
-const pMap = require('p-map');
-const Controller = require('egg').Controller;
-
-class FileController extends Controller {
+@HttpController({
+  prefix: '/xapi',
+  middleware: ['auth.userRequired'],
+})
+export class FileController extends Controller {
+  @HttpMethod({
+    path: '/files',
+    middleware: ['auth.appMemberRequired', 'params.check'],
+    args: {
+      'params.check': [['filterType', 'currentPage', 'pageSize']],
+    }
+  })
   async getFiles() {
     const { ctx, ctx: { service: { file } } } = this;
     const { currentPage, pageSize } = ctx.query;
@@ -30,6 +41,14 @@ class FileController extends Controller {
     };
   }
 
+  @HttpMethod({
+    path: '/file_status',
+    method: HttpMethods.POST,
+    middleware: ['auth.fileAccessibleRequired', 'params.check'],
+    args: {
+      'params.check': [['files']],
+    }
+  })
   async checkFileStatus() {
     const { ctx, ctx: { app: { config: { actionTime } }, service: { mysql, manager } } } = this;
     const { files } = ctx.request.body;
@@ -82,15 +101,14 @@ class FileController extends Controller {
     ctx.body = { ok: true, data: { list } };
   }
 
-  async updateFileStatusByIdWhenFailed(fileId, fileType, storage) {
-    const { ctx: { service: { mysql } } } = this;
-    if (storage) {
-      await mysql.updateFileStatusById(fileId, fileType, 3);
-    } else {
-      await mysql.updateFileStatusById(fileId, fileType, 1);
+  @HttpMethod({
+    path: '/file_transfer',
+    method: HttpMethods.POST,
+    middleware: ['auth.fileAccessibleRequired', 'params.check'],
+    args: {
+      'params.check': [['fileId', 'fileType']],
     }
-  }
-
+  })
   async transferFile() {
     const { ctx, ctx: { app, service: { mysql } } } = this;
     const { fileId, fileType } = ctx.request.body;
@@ -136,6 +154,40 @@ class FileController extends Controller {
     ctx.body = { ok: true };
   }
 
+  @HttpMethod({
+    path: '/file_favor',
+    method: HttpMethods.POST,
+    middleware: ['auth.fileAccessibleRequired', 'params.check'],
+    args: {
+      'params.check': [['fileId', 'fileType', 'favor']],
+    }
+  })
+  async favorFile() {
+    const { ctx, ctx: { service: { mysql } } } = this;
+    const { fileId, fileType, favor } = ctx.request.body;
+    const { favor: oldFavor } = ctx.file[ctx.createFileKey(fileId, fileType)];
+
+    if (Number(oldFavor) === Number(favor)) {
+      return (ctx.body = { ok: false, message: `已经${oldFavor ? '取消收藏' : '收藏'}` });
+    }
+
+    if (fileType !== 'core') {
+      await mysql.updateFileFavor(fileId, favor);
+    } else {
+      await mysql.updateCoredumpFavor(fileId, favor);
+    }
+
+    ctx.body = { ok: true };
+  }
+
+  @HttpMethod({
+    path: '/file_deletion',
+    method: HttpMethods.DELETE,
+    middleware: ['auth.fileAccessibleRequired', 'params.check'],
+    args: {
+      'params.check': [['fileId', 'fileType']],
+    }
+  })
   async deleteFile() {
     const { ctx, ctx: { app: { storage }, service: { mysql } } } = this;
     const { fileId, fileType } = ctx.request.body;
@@ -162,49 +214,12 @@ class FileController extends Controller {
     ctx.body = { ok: true };
   }
 
-  async downloadFile() {
-    const { ctx, ctx: { app: { storage, modifyFileName } } } = this;
-    const { fileId, fileType } = ctx.query;
-    const { storageKey, [storageKey]: fileName } = ctx.file[ctx.createFileKey(fileId, fileType)];
-
-    if (!fileName) {
-      return (ctx.body = { ok: false, message: '文件尚未转储' });
-    }
-
-    // set headers
-    ctx.set('content-type', 'application/octet-stream');
-    ctx.set('content-encoding', 'gzip');
-    ctx.set('content-disposition', `attachment;filename=${modifyFileName(fileName)}`);
-
-    // create pass
-    const pass = new PassThrough();
-    const downloadFileStream = storage.downloadFile(fileName);
-    if (typeof downloadFileStream.then === 'function') {
-      (await downloadFileStream).pipe(pass);
+  private async updateFileStatusByIdWhenFailed(fileId, fileType, storage) {
+    const { ctx: { service: { mysql } } } = this;
+    if (storage) {
+      await mysql.updateFileStatusById(fileId, fileType, 3);
     } else {
-      downloadFileStream.pipe(pass);
+      await mysql.updateFileStatusById(fileId, fileType, 1);
     }
-
-    ctx.body = pass;
-  }
-
-  async favorFile() {
-    const { ctx, ctx: { service: { mysql } } } = this;
-    const { fileId, fileType, favor } = ctx.request.body;
-    const { favor: oldFavor } = ctx.file[ctx.createFileKey(fileId, fileType)];
-
-    if (Number(oldFavor) === Number(favor)) {
-      return (ctx.body = { ok: false, message: `已经${oldFavor ? '取消收藏' : '收藏'}` });
-    }
-
-    if (fileType !== 'core') {
-      await mysql.updateFileFavor(fileId, favor);
-    } else {
-      await mysql.updateCoredumpFavor(fileId, favor);
-    }
-
-    ctx.body = { ok: true };
   }
 }
-
-module.exports = FileController;
