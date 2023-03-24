@@ -1,6 +1,6 @@
 import path from 'path';
 import { ConstructableT, Container, Injectable, Inject } from "@xprofiler/injection";
-import { ControllerMap } from "./controller";
+import { scan } from "./controller";
 import { IHttpControllerMetadata, IHttpMethodMetadata, IMiddlewareMap, IRouter, } from "./type";
 import {
   EGG_CONTEXT, EGG_ROUTER, EGG_MIDDLEWARES,
@@ -19,7 +19,7 @@ export class HttpServer {
   async register() {
     const container = this.container;
 
-    ControllerMap.forEach((controller: ConstructableT) => {
+    (await scan()).forEach((controller: ConstructableT) => {
       container.set(controller);
 
       const controllerMetadata: IHttpControllerMetadata =
