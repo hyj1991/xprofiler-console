@@ -18,6 +18,7 @@ export class HttpServer {
 
   async register() {
     const container = this.container;
+    await container.findModuleExports();
 
     (await Controller.scan()).forEach((controller: ConstructableT) => {
       container.set(controller);
@@ -37,16 +38,16 @@ export class HttpServer {
           .map(mid => this.parseMiddleware(mid, args[mid]));
         this.router[method](url, ...middleware, async function (ctx: any) {
           await container.run(async () => {
-            container.set({ id: EGG_CONTEXT, value: ctx });
-            const instance = container.get(controller) as typeof controller;
+            const ctrl = container.choose(controller);
+            ctrl.set({ id: EGG_CONTEXT, value: ctx });
+            const instance = ctrl.get(controller) as typeof controller;
             await instance[metadata.prop].call(instance);
           });
         });
       });
     });
 
-    await container.findModuleExports();
-    console.log('--------->', container.children[0]);
+    console.log('------->', container.children[0]);
   }
 
   private parseMiddleware(tags: string, args: any[] = [], middlewares?: IMiddlewareMap | Function) {
