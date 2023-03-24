@@ -4,7 +4,7 @@ import { promisify } from 'util';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { Controller } from '../../shared/base';
-import { HttpController, HttpMethod } from '../../../decorator/http';
+import { HttpController, HttpMethod } from '../../../common/decorator/http';
 import { HttpMethods } from '../../../constant';
 
 const gzip = promisify(zlib.gzip);

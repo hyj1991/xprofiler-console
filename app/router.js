@@ -39,10 +39,6 @@ module.exports = async app => {
   const server = container.get(HttpServer);
   await server.register();
 
-  // upload file
-  router.post('/xapi/upload_file', userRequired, appMemberRequired, checkParams(['fileType']), 'upload.fromConsole');
-  router.post('/xapi/upload_from_xtransit', checkParams(['fileId', 'fileType', 'nonce', 'timestamp', 'signature']), 'upload.fromXtransit');
-
   // team
   router.get('/xapi/team_members', userRequired, appMemberRequired, 'team.getMembers');
   router.post('/xapi/team_member', userRequired, appMemberRequired, checkParams(['userId']), 'team.inviteMember');

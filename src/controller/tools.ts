@@ -1,7 +1,7 @@
 // @ts-nocheck
 import qs from 'querystring';
 import { Controller } from './shared/base';
-import { HttpController, HttpMethod } from '../decorator/http';
+import { HttpController, HttpMethod } from '../common/decorator/http';
 
 @HttpController({
   prefix: '/dashboard',

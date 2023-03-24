@@ -1,8 +1,8 @@
 // @ts-nocheck
 import pMap from 'p-map';
-import { Controller } from '../shared/base';
-import { HttpController, HttpMethod } from '../../decorator/http';
-import { HttpMethods } from '../../constant';
+import { Controller } from '../../shared/base';
+import { HttpController, HttpMethod } from '../../../common/decorator/http';
+import { HttpMethods } from '../../../constant';
 
 @HttpController({
   prefix: '/xapi',

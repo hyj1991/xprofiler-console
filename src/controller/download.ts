@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { PassThrough } from 'stream';
 import { Controller } from './shared/base';
-import { HttpController, HttpMethod } from '../decorator/http';
+import { HttpController, HttpMethod } from '../common/decorator/http';
 
 @HttpController({
   middleware: ['auth.userRequired'],

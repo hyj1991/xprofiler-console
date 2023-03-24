@@ -6,4 +6,4 @@ export interface IMiddlewareMap {
 
 export interface IRouter extends Router { };
 
-export * from './decorator/shared/type';
+export * from './common/decorator/shared/type';
