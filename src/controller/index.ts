@@ -1,10 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { ConstructableT, Module } from "@xprofiler/injection";
+import { ConstructableT } from "@xprofiler/injection";
 import { HTTP_CONTROLLER_METADATA_KEY } from '../constant';
 import { is } from '../common/is';
 
-@Module()
 export class Controller {
   static async scan(dirname: string = __dirname): Promise<ConstructableT[]> {
     const list = new Array<ConstructableT>();

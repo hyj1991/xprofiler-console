@@ -6,7 +6,7 @@
     "declarations": true
   },
   "dependencies": {
-    "@xprofiler/injection": "^0.0.5",
+    "@xprofiler/injection": "^0.1.0",
     "basic-auth": "^2.0.1",
     "egg": "^2.26.1",
     "egg-mysql": "^3.0.0",
@@ -27,6 +27,7 @@
     "egg-mock": "^4.0.0",
     "eslint": "^7.0.0",
     "eslint-config-egg": "^8.0.1",
+    "mermaid.cli": "^0.5.1",
     "reflect-metadata": "^0.1.13",
     "typescript": "^5.0.2"
   },

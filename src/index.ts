@@ -1,11 +1,15 @@
-import path from 'path';
-import { ConstructableT, Container, Injectable, Inject } from "@xprofiler/injection";
+import path from "path";
+import fs from "fs/promises";
+import { Container, Injectable, Inject, DefineModule, BaseModule } from "@xprofiler/injection";
 import { Controller } from "./controller";
 import { IHttpControllerMetadata, IHttpMethodMetadata, IMiddlewareMap, IRouter, } from "./type";
 import {
   EGG_CONTEXT, EGG_ROUTER, EGG_MIDDLEWARES,
   HTTP_CONTROLLER_METADATA_KEY, HTTP_METHOD_METADATA_KEY,
 } from "./constant";
+
+@DefineModule()
+export class Application extends BaseModule { };
 
 @Injectable()
 export class HttpServer {
@@ -18,9 +22,8 @@ export class HttpServer {
 
   async register() {
     const container = this.container;
-    await container.findModuleExports();
-
-    (await Controller.scan()).forEach((controller: ConstructableT) => {
+    for (const controller of await Controller.scan()) {
+      await container.ready();
       container.set(controller);
 
       const controllerMetadata: IHttpControllerMetadata =
@@ -45,9 +48,15 @@ export class HttpServer {
           });
         });
       });
-    });
+    }
 
-    console.log('------->', container.children[0]);
+    const output = path.join(__dirname, 'mmd');
+    try {
+      await fs.mkdir(output);
+      await container.dump(output);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   private parseMiddleware(tags: string, args: any[] = [], middlewares?: IMiddlewareMap | Function) {

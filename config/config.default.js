@@ -19,6 +19,7 @@ module.exports = appInfo => {
 
   config.development = {
     watchDirs: ['lib', 'dist'],
+    ignoreDirs: ['dist/mmd'],
   };
 
   config.static = {

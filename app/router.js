@@ -23,6 +23,8 @@ module.exports = async app => {
     },
   });
 
-  const server = container.get(HttpServer);
+  const server = container
+    .choose(HttpServer)
+    .get(HttpServer);
   await server.register();
 };
